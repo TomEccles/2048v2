@@ -145,11 +145,20 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="2048.h" />
+    <ClInclude Include="Board.h" />
+    <ClInclude Include="MonteCarloTreeSearcher.h" />
+    <ClInclude Include="Node.h" />
+    <ClInclude Include="NodeCache.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="2048.cpp" />
+    <ClCompile Include="Board.cpp" />
+    <ClCompile Include="MonteCarloTreeSearcher.cpp" />
+    <ClCompile Include="Node.cpp" />
+    <ClCompile Include="NodeCache.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
