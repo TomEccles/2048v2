@@ -4,6 +4,10 @@
 
 typedef std::array<int, side * side> numbers;
 
+static int squashed[15][15][15][15][4] = {};
+static bool done[15][15][15][15] = {};
+static bool change[15][15][15][15] = {};
+
 Board::Board()
 {
     board = {};
@@ -90,10 +94,30 @@ bool Board::removeZerosInPlace(int start, int gap)
 
 bool Board::squashInPlace(int start, int gap)
 {
-    bool change = false;
-    change |= removeZerosInPlace(start, gap);
-    change |= consolidateInPlace(start, gap);
-    return change;
+    int *row[4];
+    for (int i = 0; i < 4; i++) row[i] = &board[start + gap*i];
+    if (done[*row[0]][*row[1]][*row[2]][*row[3]]) {
+        int oldValues[4];
+        for (int i = 0; i < 4; i++)
+            oldValues[i] = *row[i];
+        for (int i = 0; i < 4; i++)
+            *row[i] = squashed[oldValues[0]][oldValues[1]][oldValues[2]][oldValues[3]][i];
+        return change[oldValues[0]][oldValues[1]][oldValues[2]][oldValues[3]];
+    }
+    else {
+        int o[4];
+        for (int i = 0; i < 4; i++) o[i] = *row[i];
+        
+        bool c = false;
+        c |= removeZerosInPlace(start, gap);
+        c |= consolidateInPlace(start, gap);
+
+        done[o[0]][o[1]][o[2]][o[3]] = true;
+        change[o[0]][o[1]][o[2]][o[3]] = c;
+        for (int i = 0; i < 4; i++)
+            squashed[o[0]][o[1]][o[2]][o[3]][i] = *row[i];
+        return c;
+    }
 }
 
 bool Board::moveLeft()
