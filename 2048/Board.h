@@ -30,6 +30,7 @@ private:
 public:
     Board();
     ~Board();
+    std::string toString();
     bool move(Move move);
     bool addRandom();
     void print(int indent = 0);

@@ -3,6 +3,8 @@
 
 #include "stdafx.h"
 #include "Board.h"
+#include "Node.h"
+#include "GameResult.h"
 #include <iostream>
 #include <time.h>
 #include "2048.h"
@@ -42,21 +44,23 @@ int main()
     int total = 0;
     int games = 0;
     while (1) {
-        //GameResult result = new GameResult();
+        GameResult result = GameResult();
         Board board = Board();
         while(board.addRandom())
         {
             MonteCarloTreeSearcher searcher = MonteCarloTreeSearcher(board);
-            for (int i = 0; i < 1000; i++)
+            for (int i = 0; i < 100; i++)
             {
                 searcher.iteration();
             }
             Move move = searcher.bestMove();
+            result.addTurnBoard(board, move);
             if (!board.move(move)) break;
             total++;
         }
+        result.print();
         games++;
-        std::cout << "Games: " << games << " total moves: " << total << "\n";
+        //std::cout << "Games: " << games << " total moves: " << total << "\n";
     }
 
     std::cin.get();

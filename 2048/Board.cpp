@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Board.h"
 #include <iostream>
+#include <string>
 
 typedef std::array<int, side * side> numbers;
 
@@ -208,6 +209,17 @@ void Board::print(int indent)
         std::cout << "\n";
     }
     std::cout << "\n";
+}
+
+std::string Board::toString()
+{
+    std::string s = "";
+    for (int i = 0; i < side * side; i++)
+    {
+        s.append(std::to_string(board[i]));
+        s.push_back(',');
+    }
+    return s;
 }
 
 bool Board::equals(Board other)
