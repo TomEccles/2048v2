@@ -49,7 +49,7 @@ int main()
         while(board.addRandom())
         {
             MonteCarloTreeSearcher searcher = MonteCarloTreeSearcher(board);
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 1000; i++)
             {
                 searcher.iteration();
             }
@@ -60,7 +60,7 @@ int main()
         }
         result.print();
         games++;
-        //std::cout << "Games: " << games << " total moves: " << total << "\n";
+        std::cerr << "Games: " << games << " total moves: " << total << "\n";
     }
 
     std::cin.get();

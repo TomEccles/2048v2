@@ -18,6 +18,17 @@ Board::~Board()
 {
 }
 
+std::string Board::moveIndicatorString()
+{
+    std::string s = "";
+    for (Move move : allMoves)
+    {
+        s.append(std::to_string(canMove(move) ? 1 : 0));
+        s.append(",");
+    }
+    return s;
+}
+
 bool Board::move(Move move)
 {
     switch (move)
@@ -161,6 +172,12 @@ bool Board::moveDown()
     return change;
 }
 
+bool Board::canMove(Move move)
+{
+    Board newBoard = *this;
+    return newBoard.move(move);
+}
+
 int zeroes(const std::array<int, side * side> &arr) {
     int count = 0;
     for (int i : arr)
@@ -217,6 +234,18 @@ std::string Board::toString()
     for (int i = 0; i < side * side; i++)
     {
         s.append(std::to_string(board[i]));
+        s.push_back(',');
+    }
+    return s;
+}
+
+std::string Board::normalisedString()
+{
+    std::string s = "";
+    for (int i = 0; i < side * side; i++)
+    {
+        int norm = board[i] > 0 ? 1 : 0;
+        s.append(std::to_string(norm));
         s.push_back(',');
     }
     return s;

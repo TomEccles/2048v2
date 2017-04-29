@@ -26,11 +26,14 @@ private:
     bool moveRight();
     bool moveUp();
     bool moveDown();
+    bool canMove(Move move);
 
 public:
     Board();
     ~Board();
     std::string toString();
+    std::string normalisedString();
+    std::string moveIndicatorString();
     bool move(Move move);
     bool addRandom();
     void print(int indent = 0);

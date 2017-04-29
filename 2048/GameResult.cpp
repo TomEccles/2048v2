@@ -22,6 +22,11 @@ void GameResult::addTurnBoard(Board board, Move move)
 void GameResult::print()
 {
     for (auto pair : moves) {
-        std::cout << pair.first.toString() << " | " << std::to_string(static_cast<int>(pair.second)) << "\n";
+        auto board = pair.first;
+        std::string b = board.toString();
+        std::string n = board.normalisedString();
+        std::string m = board.moveIndicatorString();
+
+        std::cout << b << n << m << std::to_string(static_cast<int>(pair.second)) << "\n";
     }
 }
