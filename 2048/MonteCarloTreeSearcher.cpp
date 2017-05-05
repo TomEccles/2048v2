@@ -40,10 +40,10 @@ void MonteCarloTreeSearcher::print(int depth)
     root->print(0, depth);
 }
 
-MonteCarloTreeSearcher::MonteCarloTreeSearcher(Board board)
+MonteCarloTreeSearcher::MonteCarloTreeSearcher(Valuer *valuer, Board board)
 {
     nodeCache = NodeCache();
-    root = nodeCache.getOrAdd(board, NodeType::TURN_NEXT).first;
+    root = nodeCache.getOrAdd(board, NodeType::TURN_NEXT, valuer).first;
 }
 
 

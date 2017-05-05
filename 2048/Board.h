@@ -31,6 +31,7 @@ private:
 public:
     Board();
     ~Board();
+    std::array<int, 36> calcArray();
     std::string toString();
     std::string normalisedString();
     std::string moveIndicatorString();

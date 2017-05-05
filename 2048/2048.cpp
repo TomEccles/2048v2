@@ -9,6 +9,8 @@
 #include <time.h>
 #include "2048.h"
 #include "MonteCarloTreeSearcher.h"
+#include "EngineWrapper.h"
+#include "Valuer.h"
 
 void humanMove(Board &board)
 {
@@ -37,32 +39,38 @@ void humanMove(Board &board)
     }
 }
 
-int main()
+int main(int argc, char **argv)
 {
+    EngineWrapper wrapper = EngineWrapper(argc, argv);
+
     srand(time(0));
 
-    int total = 0;
-    int games = 0;
-    while (1) {
-        GameResult result = GameResult();
-        Board board = Board();
-        while(board.addRandom())
-        {
-            MonteCarloTreeSearcher searcher = MonteCarloTreeSearcher(board);
-            for (int i = 0; i < 1000; i++)
+    for (float valuerWeight = 0; valuerWeight < 201; valuerWeight += 100) {
+        for (float base = 1000; base < 2001; base += 1000) {
+            int total = 0;
+            std::cerr << "Valuer weight: " << valuerWeight << "  Base weight: " << base << "\n";
+            int games;
+            for (games = 0; games < 100; games++)
             {
-                searcher.iteration();
+                Board board = Board();
+                while (board.addRandom())
+                {
+                    Valuer v = Valuer(&wrapper, valuerWeight);
+                    v.base = base;
+                    MonteCarloTreeSearcher searcher = MonteCarloTreeSearcher(&v, board);
+                    for (int i = 0; i < 100; i++)
+                    {
+                        searcher.iteration();
+                    }
+                    Move move = searcher.bestMove();
+                    if (!board.move(move)) break;
+                    total++;
+                }
+                //result.print();
             }
-            Move move = searcher.bestMove();
-            result.addTurnBoard(board, move);
-            if (!board.move(move)) break;
-            total++;
+            std::cerr << "Games: " << games << " total moves: " << total << "\n";
         }
-        result.print();
-        games++;
-        std::cerr << "Games: " << games << " total moves: " << total << "\n";
     }
-
     std::cin.get();
     return 0;
 }

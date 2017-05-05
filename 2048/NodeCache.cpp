@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Node.h"
 #include "NodeCache.h"
+#include "Valuer.h"
 
 
 NodeCache::NodeCache()
@@ -13,13 +14,13 @@ NodeCache::~NodeCache()
 }
 
 // The destructor of this object will delete the cached node
-std::pair<Node*, bool> NodeCache::getOrAdd(Board board, NodeType type)
+std::pair<Node*, bool> NodeCache::getOrAdd(Board board, NodeType type, Valuer *valuer)
 {
     NodeIdentifier id = NodeIdentifier(board, type);
     Node *cached = existing(id);
     if (cached) return std::pair<Node*, bool>(cached, true);
 
-    Node *newNode = new Node(board, type);
+    Node *newNode = new Node(board, type, valuer);
     nodes[id] = newNode;
     return std::pair<Node*, bool>(newNode, false);
 }

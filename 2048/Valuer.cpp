@@ -16,5 +16,7 @@ Valuer::~Valuer()
 float Valuer::value(Board b, Move m)
 {
     int index = static_cast<int>(m);
-    return wrapper->value(b)[index] * valueWeight;
+    float *values = wrapper->value(b);
+    float prob = values[index];
+    return prob * valueWeight;
 }

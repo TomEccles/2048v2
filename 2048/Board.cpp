@@ -104,6 +104,8 @@ bool Board::removeZerosInPlace(int start, int gap)
     return change;
 }
 
+// TODO: this is an utter mess. It's currently built to be both a quick in place evaluator, and do caching.
+// Probably easier to not bother doing the evaluation in place (as speed isn't an issue with the cache).
 bool Board::squashInPlace(int start, int gap)
 {
     int *row[4];
@@ -249,6 +251,24 @@ std::string Board::normalisedString()
         s.push_back(',');
     }
     return s;
+}
+
+//TODO: 36 is a magic number
+std::array<int, 36> Board::calcArray()
+{
+    std::array<int, 36> arr;
+    for (int i = 0; i < 16; i++) {
+        arr[i] = board[i];
+        arr[i + 16] = board[i] > 0 ? 1 : 0;
+    }
+
+    int index = 0;
+    for (Move move : allMoves)
+    {
+        arr[32 + index] = canMove(move) ? 1 : 0;
+        index++;
+    }
+    return arr;
 }
 
 bool Board::equals(Board other)

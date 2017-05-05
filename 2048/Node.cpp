@@ -38,23 +38,30 @@ void Node::print(int indent, int depth = 1000)
     std::cout << " games: " << games << " score: " << score << " children:\n";
     if (depth > 0)
     {
-        if (!treeChildren.empty()) for (auto node : treeChildren) node->print(indent + 1, depth - 1);
+        if (!treeChildren.empty()) for (auto c : treeChildren) c.first->print(indent + 1, depth - 1);
     }
 }
 
+// TODO: this function is the key reason to split up Node. Random-next nodes have a very simple way of getting a
+// child, and move-next nodes a rather weird one.
 std::pair<Node*, bool> Node::getChild(NodeCache &cache)
 {
     Board newBoard = copyBoard();
     NodeType newType;
+    float prior;
     if (type == NodeType::RANDOM_NEXT)
     {
         newBoard.addRandom();
         newType = NodeType::TURN_NEXT;
+        prior = 0;
     }
     else
     {
         newType = NodeType::RANDOM_NEXT;
         bool found = false;
+
+        // TODO: we prioritise moves with no evaluations above all. That seems wrong.
+        // Particularly low in the tree, we might well want to listen to our priors more than that.
         for (Move move : allMoves)
         {
             // Finding a new node to link to this one (though
@@ -63,19 +70,26 @@ std::pair<Node*, bool> Node::getChild(NodeCache &cache)
             if (!newBoard.move(move)) continue;
             found = true;
             movesMade[static_cast<int>(move)] = true;
+            prior = valuer->value(board, move);
             break;
         }
+
         if (!found)
         {
             // No new nodes; pick the best old one
-            int bestScore = -1;
+            float bestScore = -1;
             Node *bestNode = nullptr;
-            for (Node *child : treeChildren)
+            for (auto child : treeChildren)
             {
-                int score = child->value();
+                auto node = child.first;
+                float pri = child.second;
+                float score =
+                    node->value() +
+                    pri / (node->games + 1) +
+                    valuer->base / (node->games + 1);
                 if (!bestNode || score > bestScore)
                 {
-                    bestNode = child;
+                    bestNode = child.first;
                     bestScore = score;
                 }
             }
@@ -88,8 +102,8 @@ std::pair<Node*, bool> Node::getChild(NodeCache &cache)
         return std::pair<Node*, bool>(existing, true);
     }
 
-    std::pair<Node*, bool> result = cache.getOrAdd(newBoard, newType);
-    treeChildren.push_back(result.first);
+    std::pair<Node*, bool> result = cache.getOrAdd(newBoard, newType, valuer);
+    treeChildren.push_back(std::pair<Node*, float>(result.first, prior));
 
     return result;
 }
@@ -99,8 +113,9 @@ Node * Node::bestChild()
     int mostGames = -1;
     bool found = 0;
     Node *best = nullptr;
-    for (auto child : treeChildren)
+    for (auto c : treeChildren)
     {
+        auto child = c.first;
         if (!found || child->games > mostGames)
         {
             best = child;
@@ -111,10 +126,11 @@ Node * Node::bestChild()
     return best;
 }
 
-Node::Node(Board inBoard, NodeType inType)
+Node::Node(Board inBoard, NodeType inType, Valuer *inValuer)
 {
     board = inBoard;
     type = inType;
+    valuer = inValuer;
     games = 0;
     score = 0;
     for (auto &move : movesMade) move = false;
@@ -126,9 +142,9 @@ void Node::registerScore(int newScore)
     score += newScore;
 }
 
-int Node::value()
+float Node::value()
 {
-    return score / games + 1000 / (1 + games);
+    return score / (float)games;
 }
 
 Node::~Node()
@@ -143,8 +159,9 @@ bool Node::equals(Board otherBoard, NodeType otherType)
 Node* Node::existingChild(Board board, NodeType type)
 {
     if (!treeChildren.empty()) {
-        for (auto child : treeChildren)
+        for (auto c : treeChildren)
         {
+            auto child = c.first;
             if (child->board.equals(board) && child->type == type) return child;
         }
     }
