@@ -59,7 +59,7 @@ Node* Node::getChild(NodeCache &cache)
         if (existing) return existing;
 
         Node *result = cache.getOrAdd(newBoard, NodeType::TURN_NEXT, valuer);
-        treeChildren.push_back(std::pair<Node*, float>(result, (double)0.0));
+        treeChildren.push_back(std::pair<Node*, float>(result, (float)0.0));
         return result;
     }
     else
@@ -67,17 +67,26 @@ Node* Node::getChild(NodeCache &cache)
         // TODO: we prioritise moves with no evaluations above all. That seems wrong.
         // Particularly low in the tree, we might well want to listen to our priors more than that.
         if (!evaluatedChildren) {
+            auto moves = std::vector<MoveWithNextBoard>();
             for (Move move : allMoves)
             {
                 // Finding a new node to link to this one (though
                 // it may already be in the tree from other paths)
                 Board boardWithMove = copyBoard();
                 if (!boardWithMove.move(move)) continue;
-                float prior = valuer->value(board, move);
-                Node *result = cache.getOrAdd(boardWithMove, NodeType::RANDOM_NEXT, valuer);
-                treeChildren.push_back(std::pair<Node*, float>(result, prior));
+                moves.push_back(std::pair<Move, Board>(move, boardWithMove));
             }
-            evaluatedChildren = true;
+            std::vector<std::pair<MoveWithNextBoard, float>> movesWithValues =
+                valuer->value(board, moves);
+
+            for (std::pair<MoveWithNextBoard, float> pair : movesWithValues) {
+                Board b = pair.first.second;
+                Move move = pair.first.first;
+                float prior = pair.second;
+                Node *result = cache.getOrAdd(b, NodeType::RANDOM_NEXT, valuer);
+                treeChildren.push_back(std::pair<Node*, float>(result, prior));
+                evaluatedChildren = true;
+            }
         }
 
         // Pick the best move

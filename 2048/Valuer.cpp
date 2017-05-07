@@ -13,10 +13,15 @@ Valuer::~Valuer()
 {
 }
 
-float Valuer::value(Board b, Move m)
+std::vector<std::pair<MoveWithNextBoard, float>> Valuer::value(Board current, std::vector<MoveWithNextBoard> boards)
 {
-    int index = static_cast<int>(m);
-    float *values = wrapper->value(b);
-    float prob = values[index];
-    return prob * valueWeight;
+    auto results = std::vector<std::pair<MoveWithNextBoard, float>>();
+    float *values = wrapper->value(current);
+    for (MoveWithNextBoard moveAndBoard : boards) {
+        int index = static_cast<int>(moveAndBoard.first);
+        float prob = values[index];
+        float score = prob * valueWeight;
+        results.push_back(std::pair<MoveWithNextBoard, float>(moveAndBoard, score));
+    }
+    return results;
 }
