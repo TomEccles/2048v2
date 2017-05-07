@@ -9,9 +9,8 @@ def accuracy_matrix(pred, labels):
             total = sum([a[i] for a in labels])
             
             matches = sum([a[j]*b[i] for a,b in zip(pred, labels)])
-            print("%.3f" % (matches/total),end=",")
+            print("%.3f" % (matches/total), end=",")
         print()
-
 
 
 def permute(dataset, labels):
@@ -37,8 +36,8 @@ moves = (np.arange(num_labels) == moves[:,None]).astype(np.float32)
 
 batch_size = 128
 nodes_1 = 512
-nodes_2 = 128
-nodes_3 = 32
+#nodes_2 = 128
+#nodes_3 = 32
 num_inputs = positions.shape[1]
 num_outputs = num_labels
 
@@ -61,11 +60,11 @@ entropy_graph = tf.Graph()
 def calc(x, keep_param = 1):
   mat_1 = tf.matmul(x, weights_1) + biases_1
   rel_1 = tf.nn.relu(mat_1)
-  mat_2 = tf.matmul(rel_1, weights_2) + biases_2
-  rel_2 = tf.nn.relu(mat_2)
-  mat_3 = tf.matmul(rel_2, weights_3) + biases_3
-  rel_3 = tf.nn.relu(mat_3)
-  drop_3 = tf.nn.dropout(mat_3, keep_param)
+  #mat_2 = tf.matmul(rel_1, weights_2) + biases_2
+  #rel_2 = tf.nn.relu(mat_2)
+  #mat_3 = tf.matmul(rel_2, weights_3) + biases_3
+  #rel_3 = tf.nn.relu(mat_3)
+  drop_3 = tf.nn.dropout(rel_1, keep_param)
   mat_4 = tf.matmul(drop_3, weights_4) + biases_4
   #final = tf.nn.sigmoid(mat_4)
   return mat_4
@@ -81,14 +80,14 @@ with entropy_graph.as_default():
   weights_1 = tf.Variable(
     tf.truncated_normal([num_inputs, nodes_1], stddev=0.01))
   biases_1 = tf.Variable(tf.zeros([nodes_1]))
-  weights_2 = tf.Variable(
-    tf.truncated_normal([nodes_1, nodes_2], stddev=0.001))
-  biases_2 = tf.Variable(tf.zeros([nodes_2]))
-  weights_3 = tf.Variable(
-    tf.truncated_normal([nodes_2, nodes_3], stddev=0.01))
-  biases_3 = tf.Variable(tf.zeros([nodes_3]))
+  #weights_2 = tf.Variable(
+  #  tf.truncated_normal([nodes_1, nodes_2], stddev=0.001))
+  #biases_2 = tf.Variable(tf.zeros([nodes_2]))
+  #weights_3 = tf.Variable(
+   # tf.truncated_normal([nodes_1, nodes_3], stddev=0.01))
+  #biases_3 = tf.Variable(tf.zeros([nodes_3]))
   weights_4 = tf.Variable(
-    tf.truncated_normal([nodes_3, num_outputs], stddev=0.01))
+    tf.truncated_normal([nodes_1, num_outputs], stddev=0.01))
   biases_4= tf.Variable(tf.zeros([1]))
 
   #validation
@@ -97,7 +96,8 @@ with entropy_graph.as_default():
 
   
   # Training computation.
-  weight_loss = reg_param*(tf.nn.l2_loss(weights_1)+tf.nn.l2_loss(weights_2)+tf.nn.l2_loss(weights_3)+tf.nn.l2_loss(weights_4))
+  weight_loss = reg_param*(tf.nn.l2_loss(weights_1)+tf.nn.l2_loss(weights_4))
+  #+tf.nn.l2_loss(weights_2)+tf.nn.l2_loss(weights_3)
   logits = calc(X, keep_param)
   loss =  tf.reduce_mean(
     tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=Y))+weight_loss
@@ -145,7 +145,7 @@ with tf.Session(graph=entropy_graph) as session:
       print("Validation loss: %.4f" % l)
       accuracy_matrix(pred, valid_m)
       if l > best:
-          tf.train.Saver().save(session, "./predictMoves.ckpt")
+          tf.train.Saver().save(session, "./predictMoves2.ckpt")
           break
       else: best = l
           
