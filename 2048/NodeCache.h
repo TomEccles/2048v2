@@ -11,5 +11,5 @@ private:
 public:
     NodeCache();
     ~NodeCache();
-    std::pair<Node*, bool> getOrAdd(Board board, NodeType type, Valuer *valuer);
+    Node* getOrAdd(Board board, NodeType type, Valuer *valuer);
 };

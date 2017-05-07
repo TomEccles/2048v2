@@ -18,7 +18,8 @@ typedef std::pair<Board, NodeType> NodeIdentifier;
 class Node
 {
 public:
-    std::pair<Node*, bool> getChild(NodeCache &cache);
+    bool hasAnyRollouts();
+    Node *getChild(NodeCache &cache);
     Node *bestChild();
     int rollout();
     Board copyBoard();
@@ -35,7 +36,7 @@ private:
     Board board;
     // We store the priors on this node - children may be shared with other nodes with different priors
     std::vector<std::pair<Node*, float>> treeChildren = std::vector<std::pair<Node*, float>>();
-    bool movesMade[4];
+    bool evaluatedChildren;
     Node *existingChild(Board board, NodeType type);
     int games;
     int score;

@@ -14,15 +14,15 @@ NodeCache::~NodeCache()
 }
 
 // The destructor of this object will delete the cached node
-std::pair<Node*, bool> NodeCache::getOrAdd(Board board, NodeType type, Valuer *valuer)
+Node* NodeCache::getOrAdd(Board board, NodeType type, Valuer *valuer)
 {
     NodeIdentifier id = NodeIdentifier(board, type);
     Node *cached = existing(id);
-    if (cached) return std::pair<Node*, bool>(cached, true);
+    if (cached) return cached;
 
     Node *newNode = new Node(board, type, valuer);
     nodes[id] = newNode;
-    return std::pair<Node*, bool>(newNode, false);
+    return newNode;
 }
 
 Node* NodeCache::existing(NodeIdentifier id)

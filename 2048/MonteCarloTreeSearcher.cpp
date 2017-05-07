@@ -8,10 +8,9 @@ void MonteCarloTreeSearcher::iteration()
     bool inTree = true;
     while (inTree)
     {
-        std::pair<Node*, bool> results = (path.back())->getChild(nodeCache);
-        if (!results.first) break;
-        Node *newNode = results.first;
-        inTree = results.second;
+        Node *newNode = (path.back())->getChild(nodeCache);
+        if (!newNode) break;
+        inTree = newNode->hasAnyRollouts();
         path.push_back(newNode);
     }
     int score = (path.back())->rollout();
@@ -43,7 +42,7 @@ void MonteCarloTreeSearcher::print(int depth)
 MonteCarloTreeSearcher::MonteCarloTreeSearcher(Valuer *valuer, Board board)
 {
     nodeCache = NodeCache();
-    root = nodeCache.getOrAdd(board, NodeType::TURN_NEXT, valuer).first;
+    root = nodeCache.getOrAdd(board, NodeType::TURN_NEXT, valuer);
 }
 
 

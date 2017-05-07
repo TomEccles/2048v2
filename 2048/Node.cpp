@@ -42,70 +42,63 @@ void Node::print(int indent, int depth = 1000)
     }
 }
 
+bool Node::hasAnyRollouts()
+{
+    return games > 0;
+}
+
 // TODO: this function is the key reason to split up Node. Random-next nodes have a very simple way of getting a
 // child, and move-next nodes a rather weird one.
-std::pair<Node*, bool> Node::getChild(NodeCache &cache)
+Node* Node::getChild(NodeCache &cache)
 {
-    Board newBoard = copyBoard();
-    NodeType newType;
-    float prior;
     if (type == NodeType::RANDOM_NEXT)
     {
+        Board newBoard = copyBoard();
         newBoard.addRandom();
-        newType = NodeType::TURN_NEXT;
-        prior = 0;
+        Node *existing = existingChild(newBoard, NodeType::TURN_NEXT);
+        if (existing) return existing;
+
+        Node *result = cache.getOrAdd(newBoard, NodeType::TURN_NEXT, valuer);
+        treeChildren.push_back(std::pair<Node*, float>(result, (double)0.0));
+        return result;
     }
     else
     {
-        newType = NodeType::RANDOM_NEXT;
-        bool found = false;
-
         // TODO: we prioritise moves with no evaluations above all. That seems wrong.
         // Particularly low in the tree, we might well want to listen to our priors more than that.
-        for (Move move : allMoves)
-        {
-            // Finding a new node to link to this one (though
-            // it may already be in the tree from other paths)
-            if (movesMade[static_cast<int>(move)]) continue;
-            if (!newBoard.move(move)) continue;
-            found = true;
-            movesMade[static_cast<int>(move)] = true;
-            prior = valuer->value(board, move);
-            break;
-        }
-
-        if (!found)
-        {
-            // No new nodes; pick the best old one
-            float bestScore = -1;
-            Node *bestNode = nullptr;
-            for (auto child : treeChildren)
+        if (!evaluatedChildren) {
+            for (Move move : allMoves)
             {
-                auto node = child.first;
-                float pri = child.second;
-                float score =
-                    node->value() +
-                    pri / (node->games + 1) +
-                    valuer->base / (node->games + 1);
-                if (!bestNode || score > bestScore)
-                {
-                    bestNode = child.first;
-                    bestScore = score;
-                }
+                // Finding a new node to link to this one (though
+                // it may already be in the tree from other paths)
+                Board boardWithMove = copyBoard();
+                if (!boardWithMove.move(move)) continue;
+                float prior = valuer->value(board, move);
+                Node *result = cache.getOrAdd(boardWithMove, NodeType::RANDOM_NEXT, valuer);
+                treeChildren.push_back(std::pair<Node*, float>(result, prior));
             }
-            return std::pair<Node*, bool>(bestNode, true);
+            evaluatedChildren = true;
         }
+
+        // Pick the best move
+        float bestScore = -1;
+        Node *bestNode = nullptr;
+        for (auto child : treeChildren)
+        {
+            auto node = child.first;
+            float pri = child.second;
+            float score =
+                node->value() +
+                pri / (node->games + 1) +
+                valuer->base / (node->games + 1);
+            if (!bestNode || score > bestScore)
+            {
+                bestNode = child.first;
+                bestScore = score;
+            }
+        }
+        return bestNode;
     }
-
-    Node *existing = existingChild(newBoard, newType);
-    if (existing) {
-        return std::pair<Node*, bool>(existing, true);
-    }
-
-    std::pair<Node*, bool> result = cache.getOrAdd(newBoard, newType, valuer);
-    treeChildren.push_back(std::pair<Node*, float>(result.first, prior));
-
-    return result;
 }
 
 Node * Node::bestChild()
@@ -133,7 +126,6 @@ Node::Node(Board inBoard, NodeType inType, Valuer *inValuer)
     valuer = inValuer;
     games = 0;
     score = 0;
-    for (auto &move : movesMade) move = false;
 }
 
 void Node::registerScore(int newScore)
@@ -144,7 +136,7 @@ void Node::registerScore(int newScore)
 
 float Node::value()
 {
-    return score / (float)games;
+    return games > 0 ? score / (float)games : 0;
 }
 
 Node::~Node()
