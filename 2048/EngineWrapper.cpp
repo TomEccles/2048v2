@@ -34,6 +34,7 @@ void EngineWrapper::initModule()
 {
     auto pName = PyUnicode_DecodeFSDefault("restoreTest");
     module = PyImport_Import(pName);
+    PyErr_Print();
     func = PyObject_GetAttrString(module, "go");
 }
 

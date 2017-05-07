@@ -45,31 +45,29 @@ int main(int argc, char **argv)
 
     srand(time(0));
 
-    for (float valuerWeight = 0; valuerWeight < 201; valuerWeight += 100) {
-        for (float base = 1000; base < 2001; base += 1000) {
-            int total = 0;
-            std::cerr << "Valuer weight: " << valuerWeight << "  Base weight: " << base << "\n";
-            int games;
-            for (games = 0; games < 100; games++)
+    float valuerWeight = 100;
+    float base = 1000;
+    int total = 0;
+    std::cerr << "Valuer weight: " << valuerWeight << "  Base weight: " << base << "\n";
+
+    for (int games = 0; games < 1; games++)
+    {
+        Board board = Board();
+        while (board.addRandom())
+        {
+            Valuer v = Valuer(&wrapper, valuerWeight);
+            v.base = base;
+            MonteCarloTreeSearcher searcher = MonteCarloTreeSearcher(&v, board);
+            for (int i = 0; i < 100; i++)
             {
-                Board board = Board();
-                while (board.addRandom())
-                {
-                    Valuer v = Valuer(&wrapper, valuerWeight);
-                    v.base = base;
-                    MonteCarloTreeSearcher searcher = MonteCarloTreeSearcher(&v, board);
-                    for (int i = 0; i < 100; i++)
-                    {
-                        searcher.iteration();
-                    }
-                    Move move = searcher.bestMove();
-                    if (!board.move(move)) break;
-                    total++;
-                }
-                //result.print();
+                searcher.iteration();
             }
-            std::cerr << "Games: " << games << " total moves: " << total << "\n";
+            Move move = searcher.bestMove();
+            if (!board.move(move)) break;
+            total++;
         }
+        std::cerr << "Games: " << games << " total moves: " << total << "\n";
+        //result.print();
     }
     std::cin.get();
     return 0;
