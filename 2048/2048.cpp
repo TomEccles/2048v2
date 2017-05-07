@@ -43,7 +43,8 @@ int main(int argc, char **argv)
 {
     EngineWrapper wrapper = EngineWrapper(argc, argv);
 
-    srand(time(0));
+    time_t startTime;
+    srand(time(&startTime));
 
     float valuerWeight = 100;
     float base = 1000;
@@ -55,18 +56,26 @@ int main(int argc, char **argv)
         Board board = Board();
         while (board.addRandom())
         {
+            //board.print();
             Valuer v = Valuer(&wrapper, valuerWeight);
             v.base = base;
             MonteCarloTreeSearcher searcher = MonteCarloTreeSearcher(&v, board);
             for (int i = 0; i < 100; i++)
             {
                 searcher.iteration();
+                //searcher.print(4);
             }
+            //board.print();
+            
             Move move = searcher.bestMove();
             if (!board.move(move)) break;
             total++;
         }
-        std::cerr << "Games: " << games << " total moves: " << total << "\n";
+        std::cout << "Games: " << games << " total moves: " << total << "\n";
+
+        time_t endTime;
+        time(&endTime);
+        std::cout << "Time: " << difftime(endTime, startTime);
         //result.print();
     }
     std::cin.get();
