@@ -14,14 +14,16 @@ class EngineWrapper
 public:
     EngineWrapper(int argc, char **argv);
     ~EngineWrapper();
-    float* value(Board board);
+    float* getMoveLikelihoods(Board board);
+    float getValue(Board board);
 
 
 private:
+    float getValue(std::array<int, 37> input);
     int runPython(int argc, char **argv);
-    float* run(std::array<int, 36> input);
+    float* getMoveLikelihoods(std::array<int, 36> input);
     void initModule();
-    PyObject *module;
-    PyObject *func;
+    PyObject *predictFunction;
+    PyObject *valueFunction;
 };
 

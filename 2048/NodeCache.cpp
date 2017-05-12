@@ -3,31 +3,33 @@
 #include "NodeCache.h"
 #include "Valuer.h"
 
-
 NodeCache::NodeCache()
 {
 }
 
 NodeCache::~NodeCache()
 {
-    for (auto node : nodes) delete(node.second);
+    for (auto node : moveNextNodes) delete(node.second);
+    for (auto node : appearNextNodes) delete(node.second);
 }
 
-// The destructor of this object will delete the cached node
-Node* NodeCache::getOrAdd(Board board, NodeType type, Valuer *valuer)
+MoveNextNode * NodeCache::getOrAddMoveNextNode(Board board, Valuer * valuer)
 {
-    NodeIdentifier id = NodeIdentifier(board, type);
-    Node *cached = existing(id);
+    MoveNextNode *cached = moveNextNodes[board];
     if (cached) return cached;
 
-    Node *newNode = new Node(board, type, valuer);
-    nodes[id] = newNode;
+    MoveNextNode *newNode = new MoveNextNode(board, valuer);
+    moveNextNodes[board] = newNode;
     return newNode;
 }
 
-Node* NodeCache::existing(NodeIdentifier id)
+// The destructor of this object will delete the cached node
+AppearNextNode* NodeCache::getOrAddAppearNextNode(Board board, Valuer *valuer)
 {
-    Node *node = nodes[id];
-    if (node) return node;
-    return nullptr;
+    AppearNextNode *cached = appearNextNodes[board];
+    if (cached) return cached;
+
+    AppearNextNode *newNode = new AppearNextNode(board, valuer);
+    appearNextNodes[board] = newNode;
+    return newNode;
 }

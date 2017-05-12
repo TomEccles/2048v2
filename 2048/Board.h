@@ -32,6 +32,7 @@ public:
     Board();
     ~Board();
     std::array<int, 36> calcArray();
+    std::array<int, 37> calcArrayWithSum();
     std::string toString();
     std::string normalisedString();
     std::string moveIndicatorString();

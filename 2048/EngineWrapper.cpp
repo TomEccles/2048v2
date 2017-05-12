@@ -32,19 +32,24 @@ int EngineWrapper::runPython(int argc, char **argv)
 
 void EngineWrapper::initModule()
 {
-    auto pName = PyUnicode_DecodeFSDefault("restoreTest");
+    auto pName = PyUnicode_DecodeFSDefault("runPredictor");
+    auto module = PyImport_Import(pName);
+    PyErr_Print();
+    predictFunction = PyObject_GetAttrString(module, "go");
+    
+    pName = PyUnicode_DecodeFSDefault("runValuer");
     module = PyImport_Import(pName);
     PyErr_Print();
-    func = PyObject_GetAttrString(module, "go");
+    valueFunction = PyObject_GetAttrString(module, "go");
 }
 
-float* EngineWrapper::value(Board board)
+float* EngineWrapper::getMoveLikelihoods(Board board)
 {
-    return run(board.calcArray());
+    return getMoveLikelihoods(board.calcArray());
 }
 
 // This method is extremely unsafe.
-float *EngineWrapper::run(std::array<int, 36> input)
+float *EngineWrapper::getMoveLikelihoods(std::array<int, 36> input)
 {
     float test[36];
     for (int i = 0; i < 36; i++) {
@@ -57,11 +62,38 @@ float *EngineWrapper::run(std::array<int, 36> input)
     auto pArgs = PyTuple_New(1);
     PyTuple_SetItem(pArgs, 0, reinterpret_cast<PyObject*>(np_arg));
 
-    auto pValue = PyObject_CallObject(func, pArgs);
+    auto pValue = PyObject_CallObject(predictFunction, pArgs);
     auto np_ret = reinterpret_cast<PyArrayObject*>(pValue);
     auto out = reinterpret_cast<float*>(PyArray_DATA(np_ret));
 
     return out;
+}
+
+
+float EngineWrapper::getValue(Board board)
+{
+    return getValue(board.calcArrayWithSum());
+}
+
+// This method is extremely unsafe.
+float EngineWrapper::getValue(std::array<int, 37> input)
+{
+    float test[37];
+    for (int i = 0; i < 37; i++) {
+        test[i] = input[i];
+    }
+    npy_intp dims[1]{ 37 };
+
+    auto np_arg = reinterpret_cast<PyArrayObject*>(PyArray_SimpleNewFromData(
+        1, dims, NPY_FLOAT, reinterpret_cast<void*>(test)));
+    auto pArgs = PyTuple_New(1);
+    PyTuple_SetItem(pArgs, 0, reinterpret_cast<PyObject*>(np_arg));
+
+    auto pValue = PyObject_CallObject(valueFunction, pArgs);
+    auto np_ret = reinterpret_cast<PyArrayObject*>(pValue);
+    auto out = reinterpret_cast<float*>(PyArray_DATA(np_ret));
+
+    return *out;
 }
 
 EngineWrapper::EngineWrapper(int argc, char **argv)

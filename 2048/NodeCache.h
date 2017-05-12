@@ -1,15 +1,18 @@
 #pragma once
 #include "Node.h"
+#include "AppearNextNode.h"
+#include "MoveNextNode.h"
 #include <map>
 
 class NodeCache
 {
 private:
-    std::map<NodeIdentifier, Node*> nodes;
-    Node* existing(NodeIdentifier id);
+    std::map<Board, AppearNextNode*> appearNextNodes;
+    std::map<Board, MoveNextNode*> moveNextNodes;
 
 public:
     NodeCache();
     ~NodeCache();
-    Node* getOrAdd(Board board, NodeType type, Valuer *valuer);
+    MoveNextNode* getOrAddMoveNextNode(Board board, Valuer *valuer);
+    AppearNextNode* getOrAddAppearNextNode(Board board, Valuer *valuer);
 };

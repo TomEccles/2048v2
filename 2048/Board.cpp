@@ -41,6 +41,8 @@ bool Board::move(Move move)
         return moveLeft();
     case Move::RIGHT:
         return moveRight();
+    default:
+        return false;
     }
 }
 
@@ -270,6 +272,32 @@ std::array<int, 36> Board::calcArray()
     }
     return arr;
 }
+
+//TODO: 37 is a magic number
+std::array<int, 37> Board::calcArrayWithSum()
+{
+    std::array<int, 37> arr;
+    for (int i = 0; i < 16; i++) {
+        arr[i] = board[i];
+        arr[i + 16] = board[i] > 0 ? 1 : 0;
+    }
+
+    int index = 0;
+    for (Move move : allMoves)
+    {
+        arr[32 + index] = canMove(move) ? 1 : 0;
+        index++;
+    }
+
+    arr[36] = 0;
+    for (int i : board)
+    {
+       if (i > 0) arr[36] += 1 << i;
+    }
+
+    return arr;
+}
+
 
 bool Board::equals(Board other)
 {

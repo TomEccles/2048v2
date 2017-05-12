@@ -34,17 +34,11 @@ Move MonteCarloTreeSearcher::bestMove()
     return Move::NONE;
 }
 
-void MonteCarloTreeSearcher::print(int depth)
-{
-    root->print(0, depth);
-}
-
 MonteCarloTreeSearcher::MonteCarloTreeSearcher(Valuer *valuer, Board board)
 {
     nodeCache = NodeCache();
-    root = nodeCache.getOrAdd(board, NodeType::TURN_NEXT, valuer);
+    root = nodeCache.getOrAddMoveNextNode(board, valuer);
 }
-
 
 MonteCarloTreeSearcher::~MonteCarloTreeSearcher()
 {

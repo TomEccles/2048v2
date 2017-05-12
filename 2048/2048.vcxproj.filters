@@ -48,6 +48,12 @@
     <ClInclude Include="Valuer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="AppearNextNode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MoveNextNode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -75,6 +81,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Node.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MoveNextNode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AppearNextNode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -13,10 +13,12 @@ private:
 public:
     Valuer(EngineWrapper *wrapper, float valueWeight);
     ~Valuer();
+    float valueMoveBoard(Board b);
     std::vector<std::pair<MoveWithNextBoard, float>> value(
         Board current, std::vector<MoveWithNextBoard> boards);
     // TODO: this is a quick and horrible way of getting this to nodes for them to do their valuations.
     // Should be some kind of "policy" object, probably
     float base;
+    float evalWeight;
 };
 

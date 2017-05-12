@@ -131,6 +131,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>C:\Users\TomEccles\AppData\Local\Programs\Python\Python35\libs\python35.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <Profile>true</Profile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -149,6 +150,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>C:\Users\TomEccles\AppData\Local\Programs\Python\Python35\libs\python35.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <Profile>true</Profile>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -156,10 +158,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="2048.h" />
+    <ClInclude Include="MoveNextNode.h" />
     <ClInclude Include="Board.h" />
     <ClInclude Include="EngineWrapper.h" />
     <ClInclude Include="GameResult.h" />
     <ClInclude Include="MonteCarloTreeSearcher.h" />
+    <ClInclude Include="AppearNextNode.h" />
     <ClInclude Include="Node.h" />
     <ClInclude Include="NodeCache.h" />
     <ClInclude Include="stdafx.h" />
@@ -168,10 +172,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="2048.cpp" />
+    <ClCompile Include="MoveNextNode.cpp" />
     <ClCompile Include="Board.cpp" />
     <ClCompile Include="EngineWrapper.cpp" />
     <ClCompile Include="GameResult.cpp" />
     <ClCompile Include="MonteCarloTreeSearcher.cpp" />
+    <ClCompile Include="AppearNextNode.cpp" />
     <ClCompile Include="Node.cpp" />
     <ClCompile Include="NodeCache.cpp" />
     <ClCompile Include="stdafx.cpp">

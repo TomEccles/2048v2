@@ -8,14 +8,13 @@
 class MonteCarloTreeSearcher
 {
 private:
-    Node *root;
+    MoveNextNode *root;
     NodeCache nodeCache;
     float valueWeight;
 
 public:
     void iteration();
     Move bestMove();
-    void print(int depth);
     MonteCarloTreeSearcher(Valuer *valuer, Board board);
     ~MonteCarloTreeSearcher();
 };
