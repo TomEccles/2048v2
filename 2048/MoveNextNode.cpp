@@ -35,6 +35,7 @@ Node* MoveNextNode::getChild(NodeCache &cache)
             treeChildren.push_back(std::pair<AppearNextNode*, float>(result, prior));
             evaluatedChildren = true;
         }
+        valueChildren();
     }
 
     // Pick the best move
@@ -54,6 +55,29 @@ Node* MoveNextNode::getChild(NodeCache &cache)
     return bestNode;
 }
 
+// Doing this for all children at once should speed things up a bit, I hope.
+void MoveNextNode::valueChildren()
+{
+    std::vector<AppearNextNode*> nodes = std::vector<AppearNextNode*>{};
+    std::vector<Board> boards = std::vector<Board>{};
+    for (auto pair : treeChildren)
+    {
+        AppearNextNode *n = pair.first;
+        if (!n->evaluatedValue)
+        {
+            nodes.push_back(n);
+            boards.push_back(n->board);
+        }
+    }
+
+    if (boards.size() > 0) {
+        std::vector<float> values = valuer->valueMoveBoard(boards);
+        for (int i = 0; i < nodes.size(); i++)
+        {
+            nodes[i]->registerValuation(values[i]);
+        }
+    }
+}
 
 Node * MoveNextNode::bestChild()
 {

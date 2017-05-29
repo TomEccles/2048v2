@@ -6,6 +6,8 @@
 #include "Node.h"
 #include "GameResult.h"
 #include <iostream>
+#include <string>
+#include <fstream>
 #include <time.h>
 #include "2048.h"
 #include "MonteCarloTreeSearcher.h"
@@ -40,20 +42,20 @@ void humanMove(Board &board)
 }
 
 
-void runExperiments(float valuerWeight, float base, float evalWeight, float trials, EngineWrapper wrapper) {
+void runExperiments(float priorWeight, float base, float evalWeight, float trials, EngineWrapper wrapper) {
     time_t startTime;
     time(&startTime);
-    std::cerr << "Valuer weight: " << valuerWeight << "  Base weight: " << base << " Eval weight: " << evalWeight << "\n";
+    std::cerr << "Prior weight: " << priorWeight << "  Base weight: " << base << " Eval weight: " << evalWeight << "\n";
     int total = 0;
     for (int games = 0; games < trials; games++)
     {
         int turns = 0;
-        GameResult result = GameResult("100_decisions.txt", "100_values.txt");
+        GameResult result = GameResult("05_25_decisions.txt", "05_25_values.txt");
         Board board = Board();
         while (board.addRandom())
         {
             //board.print();
-            Valuer v = Valuer(&wrapper, valuerWeight);
+            Valuer v = Valuer(&wrapper, priorWeight);
             v.base = base;
             v.evalWeight = evalWeight;
             MonteCarloTreeSearcher searcher = MonteCarloTreeSearcher(&v, board);
@@ -84,6 +86,17 @@ void runExperiments(float valuerWeight, float base, float evalWeight, float tria
     time(&endTime);
     std::cout << "Games: " << trials << " total moves: " << total << "\n";
     std::cout << "Time: " << difftime(endTime, startTime) << "\n";
+
+    std::string filename = "05_25_results.txt";
+    std::ofstream out;
+    out.open(filename, std::ios::app);
+    out << priorWeight << "," << evalWeight << "," << base << "," << total << "\n";
+    out.close();
+}
+
+int randInt(int max)
+{
+    return rand() % max;
 }
 
 int main(int argc, char **argv)
@@ -95,12 +108,14 @@ int main(int argc, char **argv)
 
     while (true)
     {
-        for (float evalWeight = 100; evalWeight > 50; evalWeight -= 100)
+        for (int i = 1; i >=1; i--)
         {
-            for (float valuerWeight = 100; valuerWeight > -50; valuerWeight -= 100)
+            for (int j = 1; j <= 1; j++)
             {
-                float base = 1000;
-                runExperiments(valuerWeight, base, evalWeight, 100, wrapper);
+                int evalWeight = 50*i;
+                int priorWeight = 200*j;
+                int base = 1000;
+                runExperiments(priorWeight, base, evalWeight, 100, wrapper);
             }
         }
     }

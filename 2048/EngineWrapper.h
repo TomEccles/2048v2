@@ -8,6 +8,7 @@
 #endif
 #include <array>
 #include "Board.h"
+#include <vector>
 
 class EngineWrapper
 {
@@ -15,11 +16,10 @@ public:
     EngineWrapper(int argc, char **argv);
     ~EngineWrapper();
     float* getMoveLikelihoods(Board board);
-    float getValue(Board board);
-
+    std::vector<float> getValues(std::vector<Board> board);
 
 private:
-    float getValue(std::array<int, 37> input);
+    float* getValues(std::vector<std::array<int, 37>> input);
     int runPython(int argc, char **argv);
     float* getMoveLikelihoods(std::array<int, 36> input);
     void initModule();

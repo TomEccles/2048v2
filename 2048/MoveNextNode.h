@@ -17,4 +17,5 @@ class MoveNextNode : public Node
         // We store the priors on this node - children may be shared with other nodes with different priors
         std::vector<std::pair<AppearNextNode*, float>> treeChildren = std::vector<std::pair<AppearNextNode*, float>>();
         bool evaluatedChildren;
+        void valueChildren();
 };

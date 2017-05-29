@@ -70,30 +70,49 @@ float *EngineWrapper::getMoveLikelihoods(std::array<int, 36> input)
 }
 
 
-float EngineWrapper::getValue(Board board)
+std::vector<float> EngineWrapper::getValues(std::vector<Board> boards)
 {
-    return getValue(board.calcArrayWithSum());
+    std::vector<std::array<int, 37>> boardsWithSums = std::vector<std::array<int, 37>>{};
+    for (Board b : boards)
+    {
+        boardsWithSums.push_back(b.calcArrayWithSum());
+    }
+
+    float *answers = getValues(boardsWithSums);
+    std::vector<float> answer = std::vector<float>{};
+    for (int i = 0; i < boards.size(); i++)
+    {
+        answer.push_back(answers[i]);
+    }
+    return answer;
 }
 
 // This method is extremely unsafe.
-float EngineWrapper::getValue(std::array<int, 37> input)
+float* EngineWrapper::getValues(std::vector<std::array<int, 37>> input)
 {
-    float test[37];
-    for (int i = 0; i < 37; i++) {
-        test[i] = input[i];
+    float *test = (float*) malloc(input.size() * 37 * sizeof(float));
+    for (int j = 0; j < input.size(); j++)
+    {
+        for (int i = 0; i < 37; i++) {
+                test[j*37+i] = input[j][i];
+        }
     }
-    npy_intp dims[1]{ 37 };
+    npy_intp dims[2]{ input.size(), 37 };
 
     auto np_arg = reinterpret_cast<PyArrayObject*>(PyArray_SimpleNewFromData(
-        1, dims, NPY_FLOAT, reinterpret_cast<void*>(test)));
+        2, dims, NPY_FLOAT, reinterpret_cast<void*>(test)));
     auto pArgs = PyTuple_New(1);
     PyTuple_SetItem(pArgs, 0, reinterpret_cast<PyObject*>(np_arg));
 
     auto pValue = PyObject_CallObject(valueFunction, pArgs);
+    PyErr_Print();
     auto np_ret = reinterpret_cast<PyArrayObject*>(pValue);
+    PyErr_Print();
     auto out = reinterpret_cast<float*>(PyArray_DATA(np_ret));
+    PyErr_Print();
 
-    return *out;
+    free(test);
+    return out;
 }
 
 EngineWrapper::EngineWrapper(int argc, char **argv)

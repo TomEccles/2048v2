@@ -8,6 +8,7 @@ class AppearNextNode : public Node
     public:
         AppearNextNode(Board board, Valuer *valuer);
         ~AppearNextNode();
+        void registerValuation(float value);
         Node *getChild(NodeCache &cache);
         float getScore(float prior);
 

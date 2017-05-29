@@ -14,6 +14,12 @@ AppearNextNode::~AppearNextNode()
 {
 }
 
+void AppearNextNode::registerValuation(float value)
+{
+    cachedValue = value;
+    evaluatedValue = true;
+}
+
 Node* AppearNextNode::getChild(NodeCache &cache)
 {
     Board newBoard = copyBoard();
@@ -42,11 +48,10 @@ MoveNextNode* AppearNextNode::existingChild(Board board)
     return nullptr;
 }
 
-
 float AppearNextNode::evalValue()
 {
-    if (!evaluatedValue) cachedValue = valuer->valueMoveBoard(board);
-    evaluatedValue = true;
+    // The parent should have triggered a valuation (and valued our siblings)
+    assert(evaluatedValue);
     return cachedValue;
 }
 
