@@ -8,7 +8,7 @@ def permute(dataset, labels):
   shuffled_labels = labels[permutation]
   return shuffled_dataset, shuffled_labels
 
-file = '100_values.txt'
+file = '05_25_values.txt'
 with open(file, 'rb') as f:
   arr = np.loadtxt(f, delimiter=',')
 
@@ -22,6 +22,17 @@ positions = np.concatenate([positions, sums],axis=1)
 print(positions.shape)
 
 
+def compare(board):
+    return [  (1 if board[i] > board[j] and board[j] > 0 else 0 )for i in range(16) for j in range(16)]
+
+
+print(positions[12])
+print(compare(positions[12]))
+positions = np.concatenate([positions, [compare(i) for i in positions]], axis = 1)
+print(positions[12])
+num_inputs = positions.shape[1]
+
+
 valid_points = 30000
 valid_p = positions[:valid_points,:].astype(np.float32)
 valid_m = moves[:valid_points].astype(np.float32)
@@ -33,7 +44,6 @@ permute(positions, moves)
 batch_size = 128
 nodes_1 = 512
 num_outputs = 1
-num_inputs = positions.shape[1]
 
 mean = sum(valid_m)/len(valid_m)
 loss = sum([(a-mean)*(a-mean) for a in valid_m])/len(valid_m)
@@ -81,7 +91,7 @@ with entropy_graph.as_default():
   loss =  tf.reduce_mean(tf.nn.l2_loss(predictions - Y)) / batch_size+weight_loss
 
   # Optimizer.
-  optimizer = tf.train.AdamOptimizer(1e-5).minimize(loss)
+  optimizer = tf.train.AdamOptimizer(1e-6).minimize(loss)
   
   # Predictions for validation data.
   valid_calc = calc(tf_valid_dataset, 1)
@@ -99,8 +109,6 @@ reg = 0
 best = None
 with tf.Session(graph=entropy_graph) as session:
   tf.initialize_all_variables().run()
-  tf.train.Saver().restore(session,"./value_100_2.ckpt")
-  print("Restored")
   for step in range(num_steps):
     # Pick an offset within the training data, which has been randomized.
     # Note: we could use better randomization across epochs.
@@ -119,8 +127,9 @@ with tf.Session(graph=entropy_graph) as session:
       print()
       l, v, m, calc = session.run( [valid_loss, diff_v, loss_v,valid_calc] )
       print("Validation loss: %.4f" % l)
-      #if best != None and l > best:
-      tf.train.Saver().save(session, "./value_100_2.ckpt")
+      if best == None or l < best:
+        tf.train.Saver().save(session, "./05_29_value.ckpt")
+        best = l
       #    break
       #else: best = l
           

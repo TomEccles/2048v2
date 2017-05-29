@@ -2,7 +2,7 @@ import numpy as np
 import tensorflow as tf
 import math as math
 
-num_inputs = 37
+num_inputs = 293
 num_outputs = 1
 nodes_1 = 512
 
@@ -24,11 +24,19 @@ with entropy_graph.as_default():
 
 session = tf.Session(graph=entropy_graph)
 with entropy_graph.as_default():  
-    tf.train.Saver().restore(session,"C:/Users/TomEccles/Documents/Visual Studio 2015/Projects/2048/2048/value_100_2.ckpt")
+    tf.train.Saver().restore(session,"C:/Users/TomEccles/Documents/Visual Studio 2015/Projects/2048/2048/05_25_value.ckpt")
 print("Initialized")
 
-def go(a):
-    p = session.run([forwards_pred], {forwards_input: [a]})
-    return p[0][0]
 
-print(go([5,3,1,0,2,3,0,0,1,2,0,0,1,0,0,0,1,1,1,0,1,1,0,0,1,1,0,0,1,0,0,0,1,1,0,1,34]))
+def compare(board):
+    return [  (1 if board[i] > board[j] and board[j] > 0 else 0 )for i in range(16) for j in range(16)]
+
+def go(a):
+    b = np.concatenate([a, [compare(i) for i in a]], axis = 1)
+    p = session.run([forwards_pred], {forwards_input: b})
+    ret = np.array([e[0] for e in p[0]])
+    return ret
+
+print(go(
+    [[5,3,1,0,2,3,0,0,1,2,0,0,1,0,0,0,1,1,1,0,1,1,0,0,1,1,0,0,1,0,0,0,1,1,0,1,34],
+     [5,3,1,0,2,3,0,0,1,2,0,0,1,0,0,0,1,1,1,0,1,1,0,0,1,1,0,0,1,0,0,0,1,1,0,1,4000]]))

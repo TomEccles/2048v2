@@ -23,7 +23,7 @@ def accuracy(predictions, labels):
   return (100.0 * np.sum(np.argmax(predictions, 1) == np.argmax(labels, 1))
           / predictions.shape[0])
 
-file = 'moves2.txt'
+file = '05_25_decisions.txt'
 with open(file, 'rb') as f:
   arr = np.loadtxt(f, delimiter=',')
 
@@ -38,6 +38,16 @@ batch_size = 128
 nodes_1 = 512
 #nodes_2 = 128
 #nodes_3 = 32
+
+def compare(board):
+    return [  (1 if board[i] > board[j] and board[j] > 0 else 0 )for i in range(16) for j in range(16)]
+
+print(positions[12])
+print(compare(positions[12]))
+positions = np.concatenate([positions, [compare(i) for i in positions]], axis = 1)
+print(positions[12])
+
+
 num_inputs = positions.shape[1]
 num_outputs = num_labels
 
@@ -115,13 +125,12 @@ with entropy_graph.as_default():
   forwards_input = tf.placeholder(tf.float32, shape=(None, num_inputs))
   forwards_pred = calc(forwards_input)
 
-num_steps = 5000001
+num_steps = 60001
 dropout = 0.2
 reg = 0
 best = 10000
 with tf.Session(graph=entropy_graph) as session:
   tf.initialize_all_variables().run()
-  tf.train.Saver().save(session,"./predictMoves.ckpt")
   print("Initialized [reg, drop]", reg, dropout)
   for step in range(num_steps):
     # Pick an offset within the training data, which has been randomized.
@@ -144,9 +153,8 @@ with tf.Session(graph=entropy_graph) as session:
       print("Validation accuracy: %.1f%%" % a)
       print("Validation loss: %.4f" % l)
       accuracy_matrix(pred, valid_m)
-      if l > best:
-          tf.train.Saver().save(session, "./predictMoves2.ckpt")
-          break
-      else: best = l
+      if l < best:
+          tf.train.Saver().save(session, "./05_29_predictMoves.ckpt")
+          best = l
           
           
