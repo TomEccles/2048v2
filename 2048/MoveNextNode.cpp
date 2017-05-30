@@ -12,30 +12,44 @@ MoveNextNode::~MoveNextNode()
 {
 }
 
+std::vector<MoveWithNextBoard> MoveNextNode::movesWithBoards() {
+    auto moves = std::vector<MoveWithNextBoard>();
+    for (Move move : allMoves)
+    {
+        // Finding a new node to link to this one (though
+        // it may already be in the tree from other paths)
+        Board boardWithMove = copyBoard();
+        if (!boardWithMove.move(move)) continue;
+        moves.push_back(std::pair<Move, Board>(move, boardWithMove));
+    }
+    return moves;
+}
+
+/*
+Calculate this node's children
+*/
+void MoveNextNode::evaluateChildren(NodeCache &cache)
+{
+    std::vector<std::pair<MoveWithNextBoard, float>> movesWithPriors =
+        valuer->priors(board, movesWithBoards());
+
+    for (std::pair<MoveWithNextBoard, float> pair : movesWithPriors) {
+        Board b = pair.first.second;
+        float prior = pair.second;
+
+        // If we already have cached node with the same board, we use it
+        AppearNextNode *result = cache.getOrAddAppearNextNode(b, valuer);
+        treeChildren.push_back(std::pair<AppearNextNode*, float>(result, prior));
+    }
+
+    valueChildren();
+}
+
 Node* MoveNextNode::getChild(NodeCache &cache)
 {
     if (!evaluatedChildren) {
-        auto moves = std::vector<MoveWithNextBoard>();
-        for (Move move : allMoves)
-        {
-            // Finding a new node to link to this one (though
-            // it may already be in the tree from other paths)
-            Board boardWithMove = copyBoard();
-            if (!boardWithMove.move(move)) continue;
-            moves.push_back(std::pair<Move, Board>(move, boardWithMove));
-        }
-        std::vector<std::pair<MoveWithNextBoard, float>> movesWithValues =
-            valuer->value(board, moves);
-
-        for (std::pair<MoveWithNextBoard, float> pair : movesWithValues) {
-            Board b = pair.first.second;
-            Move move = pair.first.first;
-            float prior = pair.second;
-            AppearNextNode *result = cache.getOrAddAppearNextNode(b, valuer);
-            treeChildren.push_back(std::pair<AppearNextNode*, float>(result, prior));
-            evaluatedChildren = true;
-        }
-        valueChildren();
+        evaluateChildren(cache);
+        evaluatedChildren = true;
     }
 
     // Pick the best move
@@ -55,7 +69,7 @@ Node* MoveNextNode::getChild(NodeCache &cache)
     return bestNode;
 }
 
-// Doing this for all children at once should speed things up a bit, I hope.
+// Doing this for all children at once speeds things up
 void MoveNextNode::valueChildren()
 {
     std::vector<AppearNextNode*> nodes = std::vector<AppearNextNode*>{};
@@ -79,6 +93,8 @@ void MoveNextNode::valueChildren()
     }
 }
 
+// This takes the child with the most evaluations.
+// Probably worth trying best score at some point!
 Node * MoveNextNode::bestChild()
 {
     int mostGames = -1;

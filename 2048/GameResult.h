@@ -5,15 +5,15 @@
 class GameResult
 {
 public:
-    GameResult(std::string inDecisionFileName, std::string inValueFileName);
+    GameResult();
     ~GameResult();
-    void print();
+    int turns();
+    void print(std::string inDecisionFileName, std::string inValueFileName);
     void addMoveNextBoard(Board board, Move move);
     void addAppearNextBoard(Board board);
+    std::string allTurns();
 
 private:
-    std::string decisionFileName;
-    std::string boardValueFileName;
     std::vector<std::pair<Board, Move>> moves;
     std::vector<Board> appearNextBoards;
 };

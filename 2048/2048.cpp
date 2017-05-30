@@ -41,53 +41,59 @@ void humanMove(Board &board)
     }
 }
 
+void printStringToFile(std::string filename, std::string printString) {
+    std::ofstream out;
+    out.open(filename);
+    out << printString;
+    out.close();
+}
+
+GameResult runGame(Valuer v, int iterations) {
+    Board board = Board();
+    GameResult result = GameResult();
+    while (board.addRandom())
+    {
+        MonteCarloTreeSearcher searcher = MonteCarloTreeSearcher(&v, board);
+        for (int i = 0; i < iterations; i++)
+        {
+            searcher.iteration();
+        }
+        Move move = searcher.bestMove();
+        result.addMoveNextBoard(board, move);
+        if (!board.move(move)) break;
+        result.addAppearNextBoard(board);
+    }
+    return result;
+}
 
 void runExperiments(float priorWeight, float base, float evalWeight, float trials, EngineWrapper wrapper) {
     time_t startTime;
     time(&startTime);
-    std::cerr << "Prior weight: " << priorWeight << "  Base weight: " << base << " Eval weight: " << evalWeight << "\n";
+    std::cout << "Prior weight: " << priorWeight << "  Base weight: " << base << " Eval weight: " << evalWeight << "\n";
     int total = 0;
+    int best = 0;
+    Valuer v = Valuer(&wrapper, priorWeight);
+    v.base = base;
+    v.evalWeight = evalWeight;
     for (int games = 0; games < trials; games++)
     {
-        int turns = 0;
-        GameResult result = GameResult("05_25_decisions.txt", "05_25_values.txt");
-        Board board = Board();
-        while (board.addRandom())
-        {
-            //board.print();
-            Valuer v = Valuer(&wrapper, priorWeight);
-            v.base = base;
-            v.evalWeight = evalWeight;
-            MonteCarloTreeSearcher searcher = MonteCarloTreeSearcher(&v, board);
-            for (int i = 0; i < 100; i++)
-            {
-                searcher.iteration();
-                //searcher.print(4);
-            }
-            //board.print();
-
-            Move move = searcher.bestMove();
-            result.addMoveNextBoard(board, move);
-            Board oldBoard = board;
-            if (!board.move(move)) break;
-            result.addAppearNextBoard(board);
-            if (board.equals(oldBoard))
-            {
-                std::cout << "Move does nothing!";
-                assert(false);
-            }
-            turns++;
-        }
+        GameResult result = runGame(v, 100);
+        int turns = result.turns();
         total += turns;
 
-        result.print();
+        result.print("05_30_decisions.txt", "05_30_values.txt");
+        if (turns > best) {
+            std::cout << "New best\n";
+            best = turns;
+            printStringToFile("05_30_best.txt", result.allTurns());
+        }
+        if (games % 10 == 9) {
+            std::cout << "Games: " << games + 1 << " total moves: " << total << "\n";
+        }
     }
-    time_t endTime;
-    time(&endTime);
     std::cout << "Games: " << trials << " total moves: " << total << "\n";
-    std::cout << "Time: " << difftime(endTime, startTime) << "\n";
 
-    std::string filename = "05_25_results.txt";
+    std::string filename = "05_30_results.txt";
     std::ofstream out;
     out.open(filename, std::ios::app);
     out << priorWeight << "," << evalWeight << "," << base << "," << total << "\n";
@@ -108,15 +114,9 @@ int main(int argc, char **argv)
 
     while (true)
     {
-        for (int i = 1; i >=1; i--)
-        {
-            for (int j = 1; j <= 1; j++)
-            {
-                int evalWeight = 50*i;
-                int priorWeight = 200*j;
-                int base = 1000;
-                runExperiments(priorWeight, base, evalWeight, 100, wrapper);
-            }
-        }
+            int evalWeight = randInt(100);
+            int priorWeight = randInt(400);
+            int base = 1000;
+            runExperiments(priorWeight, base, evalWeight, 1, wrapper);
     }
 }

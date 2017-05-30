@@ -126,6 +126,7 @@ with entropy_graph.as_default():
   forwards_pred = calc(forwards_input)
 
 num_steps = 60001
+# This dropout is better than 0; not done lots of other testing
 dropout = 0.2
 reg = 0
 best = 10000

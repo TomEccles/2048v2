@@ -5,16 +5,19 @@
 #include <fstream>
 
 
-GameResult::GameResult(std::string inDecisionFileName, std::string inValueFileName)
+GameResult::GameResult()
 {
-    decisionFileName = inDecisionFileName;
-    boardValueFileName = inValueFileName;
     moves = std::vector<std::pair<Board, Move>>();
     appearNextBoards = std::vector<Board>();
 }
 
 GameResult::~GameResult()
 {
+}
+
+int GameResult::turns()
+{
+    return moves.size();
 }
 
 void GameResult::addMoveNextBoard(Board board, Move move)
@@ -27,7 +30,23 @@ void GameResult::addAppearNextBoard(Board board)
     appearNextBoards.push_back(board);
 }
 
-void GameResult::print()
+std::string GameResult::allTurns()
+{
+    std::string result = "";
+    for (int i = 0; i < moves.size(); i++)
+    {
+        result.append(moves[i].first.toString());
+        result.append(std::to_string(static_cast<int>(moves[i].second)));
+        result.append("\n");
+        if (i < appearNextBoards.size()) {
+            result.append(appearNextBoards[i].toString());
+            result.append("\n");
+        }
+    }
+    return result;
+}
+
+void GameResult::print(std::string decisionFileName, std::string valueFileName)
 {
     std::ofstream out;
     out.open(decisionFileName, std::ios::app);
@@ -42,7 +61,7 @@ void GameResult::print()
     out.close();
 
     int turnsLeft = appearNextBoards.size();
-    out.open(boardValueFileName, std::ios::app);
+    out.open(valueFileName, std::ios::app);
     for (auto board : appearNextBoards) {
         std::string b = board.toString();
         std::string n = board.normalisedString();

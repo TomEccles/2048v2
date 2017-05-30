@@ -13,7 +13,7 @@ Valuer::~Valuer()
 {
 }
 
-std::vector<std::pair<MoveWithNextBoard, float>> Valuer::value(Board current, std::vector<MoveWithNextBoard> boards)
+std::vector<std::pair<MoveWithNextBoard, float>> Valuer::priors(Board current, std::vector<MoveWithNextBoard> boards)
 {
     auto results = std::vector<std::pair<MoveWithNextBoard, float>>();
 

@@ -2,6 +2,7 @@ import numpy as np
 import tensorflow as tf
 import math as math
 
+checkpoint = "05_29_value.ckpt"
 num_inputs = 293
 num_outputs = 1
 nodes_1 = 512
@@ -24,7 +25,7 @@ with entropy_graph.as_default():
 
 session = tf.Session(graph=entropy_graph)
 with entropy_graph.as_default():  
-    tf.train.Saver().restore(session,"C:/Users/TomEccles/Documents/Visual Studio 2015/Projects/2048/2048/05_25_value.ckpt")
+    tf.train.Saver().restore(session, checkpoint)
 print("Initialized")
 
 
